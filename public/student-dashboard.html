@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Dashboard</title>
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet"> <!-- Custom style file -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/socket.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+  <!-- Navbar with Logout -->
+  <nav class="blue">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Student Dashboard</a>
+      <ul id="nav-mobile" class="right">
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container section">
+    <!-- Available Rooms -->
+    <h5>Available Rooms</h5>
+    <ul id="roomList" class="collection"></ul>
+
+    <!-- Book a Room -->
+    <h5>Book a Room</h5>
+    <form id="bookingForm" class="card-panel grey lighten-5">
+      <div class="input-field">
+        <label for="roomSelect">Select Room</label><br>
+        <select id="roomSelect" class="browser-default" required></select>
+      </div>
+      <div class="input-field">
+        <input type="date" id="date" required>
+        <label for="date">Date</label>
+      </div>
+      <div class="input-field">
+        <input type="time" id="startTime" required>
+        <label for="startTime">Start Time</label>
+      </div>
+      <div class="input-field">
+        <input type="time" id="endTime" required>
+        <label for="endTime">End Time</label>
+      </div>
+      <button type="submit" class="btn blue">Book Room</button>
+    </form>
+    <p id="bookingStatus" style="font-weight: 500;"></p>
+
+    <!-- Your Bookings -->
+    <h5>Your Bookings</h5>
+    <ul id="userBookings" class="collection"></ul>
+  </div>
+
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <script>
+    let userId = '';
+
+    function parseJwt(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1]));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    const decoded = parseJwt(token);
+    if (decoded) userId = decoded.id;
+
+    async function fetchRooms() {
+      try {
+        const res = await fetch('/api/rooms');
+        const rooms = await res.json();
+        const list = document.getElementById('roomList');
+        const select = document.getElementById('roomSelect');
+        list.innerHTML = '';
+        select.innerHTML = '<option value="" disabled selected>Select a room</option>';
+
+        rooms.forEach(room => {
+          if (!room._id || !room.name) return;
+
+          const li = document.createElement('li');
+          li.className = 'collection-item';
+          li.textContent = `${room.name} (Capacity: ${room.capacity})`;
+          list.appendChild(li);
+
+          const option = document.createElement('option');
+          option.value = room._id;
+          option.textContent = room.name;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error('❌ fetchRooms error:', err);
+      }
+    }
+
+    async function loadUserBookings() {
+      try {
+        const res = await fetch('/api/bookings/' + userId);
+        const bookings = await res.json();
+        const list = document.getElementById('userBookings');
+        list.innerHTML = '';
+
+        bookings.forEach(b => {
+          if (!b.roomId || !b.roomId.name) return;
+
+          const li = document.createElement('li');
+          li.className = 'collection-item';
+          li.innerHTML = `${b.roomId.name} on ${b.date} from ${b.startTime} to ${b.endTime}
+            <button class="btn-small red right" onclick="cancelBooking('${b._id}')">Cancel</button>`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error('❌ loadUserBookings error:', err);
+      }
+    }
+
+    async function cancelBooking(bookingId) {
+      if (!confirm('Are you sure you want to cancel this booking?')) return;
+      try {
+        const res = await fetch('/api/bookings/cancel/' + bookingId, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const msg = await res.json();
+        alert(msg.message || 'Booking cancelled');
+        loadUserBookings();
+        fetchRooms();
+      } catch (err) {
+        alert('An error occurred while cancelling the booking.');
+      }
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId: document.getElementById('roomSelect').value,
+          userId,
+          date: document.getElementById('date').value,
+          startTime: document.getElementById('startTime').value,
+          endTime: document.getElementById('endTime').value
+        })
+      });
+      const data = await res.json();
+      document.getElementById('bookingStatus').textContent = data.message;
+      if (res.ok) {
+        loadUserBookings();
+        fetchRooms();
+      }
+    });
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
+    // Real-time updates via Socket.IO
+    socket.on('bookingCreated', () => {
+      fetchRooms();
+      loadUserBookings();
+    });
+
+    socket.on('bookingCancelled', () => {
+      fetchRooms();
+      loadUserBookings();
+    });
+
+    socket.on('bookingDeleted', () => {
+      fetchRooms();
+      loadUserBookings();
+    });
+
+    socket.on('bookingUpdated', () => {
+      fetchRooms();
+      loadUserBookings();
+    });
+
+    fetchRooms();
+    loadUserBookings();
+  </script>
+</body>
+</html>

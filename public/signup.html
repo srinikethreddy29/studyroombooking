@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup</title>
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="blue">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Signup</a>
+    </div>
+  </nav>
+
+  <div class="container section">
+    <form id="signupForm" class="card-panel grey lighten-5">
+      <div class="input-field">
+        <input type="text" id="username" required />
+        <label for="username">Username</label>
+      </div>
+      <div class="input-field">
+        <input type="email" id="email" required />
+        <label for="email">Email</label>
+      </div>
+      <div class="input-field">
+        <input type="password" id="password" required />
+        <label for="password">Password</label>
+      </div>
+      <div class="input-field">
+        <select id="role" class="browser-default" required>
+          <option value="" disabled selected>Select role</option>
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <button type="submit" class="btn blue">Signup</button>
+    </form>
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+  </div>
+
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('username').value,
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+          role: document.getElementById('role').value
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert('Signup successful. You can now login.');
+        window.location.href = 'login.html';
+      } else {
+        alert(data.message || 'Signup failed');
+      }
+    });
+  </script>
+
+</body>
+</html>

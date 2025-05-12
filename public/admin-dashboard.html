@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <!-- ✅ Materialize CSS CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet"> <!-- ✅ Your custom styles -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/socket.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+  <!-- ✅ Navbar with Logout -->
+  <nav class="blue">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Admin Dashboard</a>
+      <ul id="nav-mobile" class="right">
+        <li><a href="#" onclick="logout()">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container section">
+    <!-- ✅ System Stats -->
+    <h5>System Stats</h5>
+    <div class="card-panel grey lighten-4">
+      <p id="stats"></p>
+    </div>
+
+    <!-- ✅ User Bookings -->
+    <h5>User Bookings</h5>
+    <div id="userBookings" class="card-panel grey lighten-4"></div>
+
+    <!-- ✅ Room Creation -->
+    <h5>Create New Room</h5>
+    <form id="createRoomForm" class="card-panel grey lighten-5">
+      <div class="input-field">
+        <input type="text" id="roomName" required />
+        <label for="roomName">Room Name</label>
+      </div>
+      <div class="input-field">
+        <input type="number" id="roomCapacity" required />
+        <label for="roomCapacity">Capacity</label>
+      </div>
+      <button class="btn blue" type="submit">Create Room</button>
+    </form>
+
+    <!-- ✅ Room Management -->
+    <h5>Manage Existing Rooms</h5>
+    <ul id="roomList" class="collection"></ul>
+  </div>
+
+  <!-- ✅ Materialize JS (for labels & components) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <script>
+    // Load dashboard stats
+    async function loadStats() {
+      const res = await fetch('/api/admin/dashboard');
+      const data = await res.json();
+      document.getElementById('stats').innerText =
+        `Users: ${data.users} | Rooms: ${data.rooms} | Bookings: ${data.bookings}`;
+    }
+
+    // Load user bookings
+    async function loadUserBookings() {
+      const res = await fetch('/api/bookings');
+      const bookings = await res.json();
+      const container = document.getElementById('userBookings');
+      const grouped = {};
+
+      bookings.forEach(b => {
+        const name = b.userId?.username || 'Unknown';
+        if (!grouped[name]) grouped[name] = [];
+        grouped[name].push(b);
+      });
+
+      container.innerHTML = Object.entries(grouped).map(([user, bookings]) => {
+        return `<div>
+                  <strong>${user}</strong>
+                  <ul>${bookings.map(b =>
+                    `<li>${b.date} (${b.startTime} - ${b.endTime}) – Room: ${b.roomId?.name}</li>`
+                  ).join('')}</ul>
+                </div>`;
+      }).join('');
+    }
+
+    // Load all rooms
+    async function loadRooms() {
+      const res = await fetch('/api/rooms');
+      const rooms = await res.json();
+      const list = document.getElementById('roomList');
+      list.innerHTML = '';
+
+      rooms.forEach(room => {
+        const li = document.createElement('li');
+        li.className = 'collection-item';
+        li.innerHTML = `
+          <div>
+            <strong>${room.name}</strong> (Capacity: ${room.capacity})<br>
+            <input class="browser-default" type="text" value="${room.name}" id="name-${room._id}" />
+            <input class="browser-default" type="number" value="${room.capacity}" id="capacity-${room._id}" />
+            <br>
+            <button class="btn-small orange" onclick="updateRoom('${room._id}')">Update</button>
+            <button class="btn-small red" onclick="deleteRoom('${room._id}')">Delete</button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // Create room
+    document.getElementById('createRoomForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('roomName').value;
+      const capacity = document.getElementById('roomCapacity').value;
+
+      await fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, capacity })
+      });
+
+      document.getElementById('roomName').value = '';
+      document.getElementById('roomCapacity').value = '';
+      M.updateTextFields(); // Re-initialize labels
+      await loadRooms();
+    });
+
+    // Update room
+    async function updateRoom(id) {
+      const name = document.getElementById(`name-${id}`).value;
+      const capacity = document.getElementById(`capacity-${id}`).value;
+
+      await fetch(`/api/rooms/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, capacity })
+      });
+
+      await loadRooms();
+    }
+
+    // Delete room with confirmation
+    async function deleteRoom(id) {
+      const name = document.getElementById(`name-${id}`).value;
+      if (!confirm(`Are you sure you want to delete room "${name}"?`)) return;
+
+      await fetch(`/api/rooms/${id}`, { method: 'DELETE' });
+      await loadRooms();
+    }
+
+    // ✅ Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+
+    // Initial Load
+    loadStats();
+    loadUserBookings();
+    loadRooms();
+
+    // Socket.IO events for live sync
+    socket.on('bookingCreated', () => {
+      console.log("📢 bookingCreated received in Admin");
+      loadUserBookings();
+      loadStats();
+    });
+
+    socket.on('bookingCancelled', () => {
+      console.log("📢 bookingCancelled received in Admin");
+      loadUserBookings();
+      loadStats();
+    });
+
+    socket.on('bookingUpdated', () => {
+      console.log("📢 bookingUpdated received in Admin");
+      loadUserBookings();
+    });
+
+    socket.on('bookingDeleted', () => {
+      console.log("📢 bookingDeleted received in Admin");
+      loadUserBookings();
+    });
+  </script>
+</body>
+</html>

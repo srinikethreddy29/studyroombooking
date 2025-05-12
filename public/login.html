@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="blue">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Login</a>
+    </div>
+  </nav>
+
+  <div class="container section">
+    <form id="loginForm" class="card-panel grey lighten-5">
+      <div class="input-field">
+        <input type="email" id="email" required />
+        <label for="email" class="active">Email</label>
+      </div>
+      <div class="input-field">
+        <input type="password" id="password" required />
+        <label for="password" class="active">Password</label>
+      </div>
+      <button type="submit" class="btn blue">Login</button>
+    </form>
+    <p>Don’t have an account? <a href="signup.html">Sign up here</a></p>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        const decoded = JSON.parse(atob(data.token.split('.')[1]));
+        window.location.href = decoded.role === 'admin' ? 'admin-dashboard.html' : 'student-dashboard.html';
+      } else {
+        alert(data.message || 'Login failed');
+      }
+    });
+  </script>
+
+</body>
+</html>

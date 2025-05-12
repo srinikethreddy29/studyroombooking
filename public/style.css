@@ -1,0 +1,60 @@
+body {
+    background-color: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h5 {
+    margin-top: 40px;
+    color: #1976d2;
+  }
+  
+  .container {
+    margin-top: 30px;
+  }
+  
+  nav {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  nav .brand-logo {
+    font-weight: 500;
+  }
+  
+  .card-panel {
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: none;
+  }
+  
+  .collection-item {
+    border: none;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  
+  input.browser-default {
+    margin: 6px 0 12px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  
+  button.btn, button.btn-small {
+    margin-right: 10px;
+    margin-top: 5px;
+  }
+  
+  #stats {
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+  
+  form input:focus {
+    border-bottom: 2px solid #2196f3 !important;
+    box-shadow: none !important;
+  }  
