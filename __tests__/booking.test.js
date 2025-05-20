@@ -44,7 +44,7 @@ describe('Booking API Tests', () => {
         endTime: '12:00'
       });
 
-    console.log(' Booking response:', res.body); // optional debug
+    console.log(' Booking response:', res.body); // optional run debug
 
     expect([201, 400, 404]).toContain(res.statusCode);
 

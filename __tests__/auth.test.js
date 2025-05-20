@@ -8,7 +8,7 @@ describe('Auth API Tests', () => {
     password: 'pass123',
     role: 'student'
   };
-
+//
   it('should sign up', async () => {
     const res = await request(app).post('/api/auth/signup').send(user);
     expect([200, 201, 400]).toContain(res.statusCode);
