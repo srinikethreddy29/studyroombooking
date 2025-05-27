@@ -2,16 +2,16 @@
 <html>
 <head>
   <title>Admin Dashboard</title>
-  <!-- ✅ Materialize CSS CDN -->
+  
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-  <link href="style.css" rel="stylesheet"> <!-- ✅ Your custom styles -->
+  <link href="style.css" rel="stylesheet"> 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/socket.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
 
-  <!-- ✅ Navbar with Logout -->
+  <!-- Navbar with Logout -->
   <nav class="blue">
     <div class="nav-wrapper container">
       <a href="#" class="brand-logo">Admin Dashboard</a>
@@ -22,18 +22,18 @@
   </nav>
 
   <div class="container section">
-    <!-- ✅ System Stats -->
+    <!--  System Stats -->
     <h5>System Stats</h5>
     <div class="card-panel grey lighten-4">
       <p id="stats"></p>
       <small id="lastUpdated" class="grey-text"></small> 
     </div>
 
-    <!-- ✅ User Bookings -->
+    <!--  User Bookings -->
     <h5>User Bookings</h5>
     <div id="userBookings" class="card-panel grey lighten-4"></div>
 
-    <!-- ✅ Room Creation -->
+    <!--  Room Creation -->
     <h5>Create New Room</h5>
     <form id="createRoomForm" class="card-panel grey lighten-5">
       <div class="input-field">
@@ -47,12 +47,12 @@
       <button class="btn blue" type="submit">Create Room</button>
     </form>
 
-    <!-- ✅ Room Management -->
+    <!--  Room Management -->
     <h5>Manage Existing Rooms</h5>
     <ul id="roomList" class="collection"></ul>
   </div>
 
-  <!-- ✅ Materialize JS (for labels & components) -->
+  <!--  Materialize JS (for labels & components) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
   <script>
@@ -154,7 +154,7 @@
       await loadRooms();
     }
 
-    // ✅ Logout function
+    //  Logout function
     function logout() {
       localStorage.removeItem('token');
       window.location.href = 'login.html';
