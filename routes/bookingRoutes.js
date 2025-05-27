@@ -7,7 +7,7 @@ router.post('/', bookingController.createBooking);
 router.get('/', bookingController.getBookings);
 router.get('/:userId', bookingController.getUserBookings);
 
-// ✅ Place cancel route BEFORE the general delete route
+// Placeing cancel route BEFORE the general delete route
 router.delete('/cancel/:bookingId', bookingController.cancelBooking);
 
 router.put('/:id', bookingController.updateBooking);

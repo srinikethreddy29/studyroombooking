@@ -10,19 +10,20 @@ const io = socketIo(server, {
   cors: { origin: '*' }
 });
 
+// Make Socket.IO available in routes/controllers if needed
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// ✅ Socket logging: who connects
+// ✅ Socket events
 io.on('connection', (socket) => {
   console.log(`⚡ Socket Connected: ${socket.id}`);
 
   socket.on('register', (role) => {
     if (role === 'admin') console.log('👤 Admin connected via socket');
     else if (role === 'student') console.log('🎓 Student connected via socket');
-    else console.log(' Unknown role connected');
+    else console.log('⚠️ Unknown role connected');
   });
 
   socket.on('disconnect', () => {
@@ -32,6 +33,6 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server on http://localhost:${PORT}`);
-  console.log(`Signup page: http://localhost:${PORT}/signup.html`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📄 Signup page: http://localhost:${PORT}/signup.html`);
 });

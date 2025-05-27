@@ -26,6 +26,7 @@
     <h5>System Stats</h5>
     <div class="card-panel grey lighten-4">
       <p id="stats"></p>
+      <small id="lastUpdated" class="grey-text"></small> 
     </div>
 
     <!-- ✅ User Bookings -->
@@ -61,6 +62,8 @@
       const data = await res.json();
       document.getElementById('stats').innerText =
         `Users: ${data.users} | Rooms: ${data.rooms} | Bookings: ${data.bookings}`;
+      document.getElementById('lastUpdated').innerText =
+        `Last Refreshed: ${new Date().toLocaleString()}`; // 
     }
 
     // Load user bookings

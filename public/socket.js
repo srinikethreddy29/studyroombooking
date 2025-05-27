@@ -1,6 +1,6 @@
 const socket = io();
 
-// 🔑 Register the user's role from token
+// Register the user's role from token
 const token = localStorage.getItem('token');
 if (token) {
   const decoded = JSON.parse(atob(token.split('.')[1]));

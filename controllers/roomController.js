@@ -5,8 +5,13 @@ exports.createRoom = async (req, res) => {
     const room = new Room(req.body);
     await room.save();
 
-    // ✅ Log to terminal after room creation
-    console.log(`A Room created by Admin: ${room.name}`);
+    //  Log to terminal after room creation
+    console.log(`✅ A Room created by Admin: ${room.name}`);
+
+    //  Emit roomCreated event for real-time update
+    if (req.io && req.io.emit) {
+      req.io.emit("roomCreated", room);
+    }
 
     res.status(201).json(room);
   } catch (err) {
@@ -28,7 +33,7 @@ exports.updateRoom = async (req, res) => {
     const room = await Room.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!room) return res.status(404).json({ message: 'Room not found' });
 
-    // ✅ Log room update
+    //  Log room update
     console.log(`🛠️ Room updated by Admin: ${room.name}, capacity set to ${room.capacity}`);
 
     res.status(200).json(room);
@@ -42,8 +47,13 @@ exports.deleteRoom = async (req, res) => {
     const room = await Room.findByIdAndDelete(req.params.id);
     if (!room) return res.status(404).json({ message: 'Room not found' });
 
-    // ✅ Log room deletion
+    // Log room deletion
     console.log(`❌ Room deleted by Admin: ${room.name}`);
+
+    // Emit roomDeleted event for real-time update
+    if (req.io && req.io.emit) {
+      req.io.emit("roomDeleted", room._id.toString());
+    }
 
     res.status(200).json({ message: 'Room deleted successfully' });
   } catch (err) {

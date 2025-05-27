@@ -2,16 +2,14 @@
 <html>
 <head>
   <title>Student Dashboard</title>
-  <!-- Materialize CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-  <link href="style.css" rel="stylesheet"> <!-- Custom style file -->
+  <link href="style.css" rel="stylesheet">
   <script src="/socket.io/socket.io.js"></script>
   <script src="/socket.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
 
-  <!-- Navbar with Logout -->
   <nav class="blue">
     <div class="nav-wrapper container">
       <a href="#" class="brand-logo">Student Dashboard</a>
@@ -22,11 +20,9 @@
   </nav>
 
   <div class="container section">
-    <!-- Available Rooms -->
     <h5>Available Rooms</h5>
     <ul id="roomList" class="collection"></ul>
 
-    <!-- Book a Room -->
     <h5>Book a Room</h5>
     <form id="bookingForm" class="card-panel grey lighten-5">
       <div class="input-field">
@@ -49,12 +45,10 @@
     </form>
     <p id="bookingStatus" style="font-weight: 500;"></p>
 
-    <!-- Your Bookings -->
     <h5>Your Bookings</h5>
     <ul id="userBookings" class="collection"></ul>
   </div>
 
-  <!-- Materialize JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
   <script>
@@ -85,6 +79,7 @@
 
           const li = document.createElement('li');
           li.className = 'collection-item';
+          li.id = `room-${room._id}`;
           li.textContent = `${room.name} (Capacity: ${room.capacity})`;
           list.appendChild(li);
 
@@ -156,13 +151,11 @@
       }
     });
 
-    // Logout function
     function logout() {
       localStorage.removeItem('token');
       window.location.href = 'login.html';
     }
 
-    // Real-time updates via Socket.IO
     socket.on('bookingCreated', () => {
       fetchRooms();
       loadUserBookings();
@@ -181,6 +174,32 @@
     socket.on('bookingUpdated', () => {
       fetchRooms();
       loadUserBookings();
+    });
+
+    socket.on("roomDeleted", (deletedRoomId) => {
+      const deletedLi = document.getElementById(`room-${deletedRoomId}`);
+      if (deletedLi) {
+        deletedLi.remove();
+        console.log(`Room ${deletedRoomId} was removed in real-time.`);
+      }
+    });
+
+    socket.on("roomCreated", (room) => {
+      const list = document.getElementById('roomList');
+      const select = document.getElementById('roomSelect');
+
+      const li = document.createElement('li');
+      li.className = 'collection-item';
+      li.id = `room-${room._id}`;
+      li.textContent = `${room.name} (Capacity: ${room.capacity})`;
+      list.appendChild(li);
+
+      const option = document.createElement('option');
+      option.value = room._id;
+      option.textContent = room.name;
+      select.appendChild(option);
+
+      console.log(`🟢 New room ${room.name} added live.`);
     });
 
     fetchRooms();
