@@ -10,7 +10,8 @@ const io = socketIo(server, {
   cors: { origin: '*' }
 });
 
-// Make Socket.IO available in routes/controllers if needed
+// Injecting io into req for use in bookingController.js real-time events
+// Makeing Socket.IO available in routes/controllers if needed
 app.use((req, res, next) => {
   req.io = io;
   next();
