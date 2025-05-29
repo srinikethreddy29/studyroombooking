@@ -1,3 +1,4 @@
+// Added test cases for booking creation and retrieval via API
 const request = require('supertest');
 const app = require('../app');
 const mongoose = require('mongoose');

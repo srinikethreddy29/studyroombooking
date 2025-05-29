@@ -1,3 +1,4 @@
+// Wrote tests for user signup and login using Jest + Supertest
 const request = require('supertest');
 const app = require('../app');
 
