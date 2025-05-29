@@ -1,3 +1,4 @@
+// Added Express routes for Room CRUD to support admin dashboard actions
 const express = require('express');
 const router = express.Router();
 const roomController = require('../controllers/roomController');
