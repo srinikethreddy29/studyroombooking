@@ -92,7 +92,7 @@
         console.error('❌ fetchRooms error:', err);
       }
     }
-
+ //  Developed student-dashboard.html to display active bookings
     async function loadUserBookings() {
       try {
         const res = await fetch('/api/bookings/' + userId);
@@ -114,6 +114,8 @@
       }
     }
 
+   
+//  Implemented cancel functionality using JavaScript (below)
     async function cancelBooking(bookingId) {
       if (!confirm('Are you sure you want to cancel this booking?')) return;
       try {
