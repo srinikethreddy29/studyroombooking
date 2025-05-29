@@ -173,6 +173,9 @@
       loadUserBookings();
     });
 
+    // Real-time listener for booking updates
+// When bookingUpdated is emitted from backend, refresh room list and user's bookings
+
     socket.on('bookingUpdated', () => {
       fetchRooms();
       loadUserBookings();
