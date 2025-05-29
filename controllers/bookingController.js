@@ -1,3 +1,4 @@
+// Real-time booking events emitted via Socket.IO for booking create, update, delete, cancel
 const Booking = require("../models/bookingModel");
 const Room = require("../models/roomModel");
 
@@ -8,7 +9,7 @@ exports.createBooking = async (req, res) => {
     const room = await Room.findById(roomId);
     if (!room) return res.status(404).json({ message: "Room not found" });
 
-    // ✅ NEW: Prevent duplicate booking by same student for same time slot
+    // NEW: Prevent duplicate booking by same student for same time slot
     const duplicate = await Booking.findOne({
       roomId,
       userId,
@@ -21,7 +22,7 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: "You’ve already booked this room for the same slot." });
     }
 
-    // ✅ Capacity check
+    // Capacity check
     const existingBookings = await Booking.countDocuments({ roomId, date });
     if (existingBookings >= room.capacity) {
       return res.status(400).json({ message: "Room is fully booked for this date" });
