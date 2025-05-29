@@ -1,6 +1,7 @@
 const Room = require('../models/roomModel');
 
 // Implemented full Room CRUD functions for admin panel (create, read, update, delete)
+// Added Socket.IO emit calls for roomCreated and roomDeleted for real-time updates
 exports.createRoom = async (req, res) => {
   try {
     const room = new Room(req.body);
